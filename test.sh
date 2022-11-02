@@ -1,2 +1,5 @@
-sudo docker run -it -v$(pwd):/root/.config/nvim/decl decl-test
+sudo docker run -it \
+  -v $(pwd):/root/.config/nvim/pack/common/start/decl:ro \
+  -v $(pwd)/test:/root/.config/nvim/test:ro \
+  decl-test
 echo ''
