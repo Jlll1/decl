@@ -1,7 +1,3 @@
-local M = {}
+local test = require('test/test-helper').test
 
-function M.test()
-  require('decl').test()
-end
-
-return M
+test("Test number one", 1)

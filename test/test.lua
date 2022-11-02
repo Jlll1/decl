@@ -1,6 +1,8 @@
 local function run()
-  local csharp = require('test/lang/csharp/test')
-  csharp.test()
+  local test = require('test/test-helper')
+  print('csharp tests')
+  require('test/lang/csharp/test')
+  test.execute()
 end
 
 return {

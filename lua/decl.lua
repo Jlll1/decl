@@ -88,8 +88,4 @@ function M.go_to()
   return results
 end
 
-function M.test()
-  print('decl')
-end
-
 return M
