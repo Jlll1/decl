@@ -15,7 +15,7 @@ filetype_to_languagehandler['lua'] = require('lang/lua')
 function M.go_to()
   local results = {}
 
-  lang_handler = filetype_to_languagehandler[vim.bo.filetype]
+  lang_handler = filetype_to_languagehandler['cs']
   -- @INCOMPLETE provide error message
   if not lang_handler then return end
 
