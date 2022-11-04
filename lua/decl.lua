@@ -15,6 +15,7 @@ filetype_to_languagehandler['lua'] = require('lang/lua')
 function M.go_to()
   local results = {}
 
+  -- @TODO hardcoded filetype
   lang_handler = filetype_to_languagehandler['cs']
   -- @INCOMPLETE provide error message
   if not lang_handler then return end
@@ -33,10 +34,9 @@ function M.go_to()
   if not query_string then return results end
 
   local curr_root = curr_parser:tree_for_range({ row, col, row, col }):root()
-  providing_scopes = lang_handler.get_providing_scopes(curr_root, bufnr, selected_node)
+  local selected_node_scopes = lang_handler.get_scopes_for_node(curr_root, bufnr, selected_node)
 
   local rgcmd = "rg --vimgrep --no-heading " .. vim.fn.shellescape(selected_node_text)
-
   -- Since we iterate over all declarations in a file, we don't need to include any file more than once.
   local filenames = {}
   for line in io.popen(rgcmd):lines() do
@@ -47,7 +47,8 @@ function M.go_to()
   for filename, _ in pairs(filenames) do
     -- The declaration must be in a language that matches the current one.
     local file_extension = string.match(filename, '.*%.(.*)')
-    if file_extension ~= vim.bo.filetype then goto continue end
+    -- @TODO hardcoded filetype
+    if file_extension ~= 'cs' then goto continue end
 
     local file = io.open(filename, "r")
     local file_content = file:read("*all")
@@ -58,25 +59,19 @@ function M.go_to()
 
     parser:for_each_tree(function (tstree, tree)
       local root = tstree:root()
-      local covering_scopes = lang_handler.get_covering_scopes(root, file_content)
-      if providing_scopes.namespace_scopes[covering_scopes.namespace_scope] then
-        local query = vim.treesitter.parse_query(language, query_string)
-        local matches = query:iter_captures(root, file_content, 0, -1)
-        for id, node, metadata in matches do
-          for _, scope in pairs(covering_scopes.class_scopes) do
-            local node_start_row, node_start_col, node_end_row, node_end_col = node:range()
-            if utils.does_range_contain(
-              { scope.start[1], scope.start[2], scope.finish[1], scope.finish[2] },
-              { node_start_row, node_start_col, node_end_row, node_end_col }) then
-              if providing_scopes.class_scopes[scope.name] then
-                local node_text = vim.treesitter.query.get_node_text(node, file_content)
-                -- @IMPROVEMENT can matching be done with a query?
-                if node_text == selected_node_text then
-                  local row, col, _ = node:start()
-                  results[#results + 1] = { filename = filename, row = row + 1, col = col }
-                end
-              end
-            end
+      local query = vim.treesitter.parse_query(language, query_string)
+      local matches = query:iter_captures(root, file_content, 0, -1)
+      for id, node, metadata in matches do
+        local node_scopes = lang_handler.get_scopes_for_node(root, file_content, node)
+        local node_text = vim.treesitter.query.get_node_text(node, file_content)
+        -- @IMPROVEMENT can matching be done with a query?
+        if node_text == selected_node_text then
+          if (selected_node_scopes.module == node_scopes.module or
+                selected_node_scopes.imported_modules[node_scopes.module]) and
+              selected_node_scopes.ctype == node_scopes.ctype and
+              selected_node_scopes.method == node_scopes.method then
+            local row, col, _ = node:start()
+            results[#results + 1] = { filename = filename, row = row + 1, col = col }
           end
         end
       end

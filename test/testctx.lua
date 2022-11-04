@@ -23,7 +23,7 @@ M.assert = {
     if not found then
       print('    Test failed')
       print('    Expected ' .. target .. ' to contain: ' .. vim.inspect(expected))
-      print('    But got: { ' .. table.concat(collection, ', ') .. ' }')
+      print('    But got: ' .. vim.inspect(collection))
       return false
     end
     return true

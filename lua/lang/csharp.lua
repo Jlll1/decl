@@ -3,73 +3,57 @@ M.language = 'c_sharp'
 
 local utils = require('utils')
 
--- content can be either bufnr or text
-function M.get_providing_scopes(root, content, selected_node)
-  local namespace_scopes = {}
-  do
-    -- @INCOMPLETE handle nested qualified names - Foo.Bar etc.
-    local namespace_scopes_query = [[([
-      (using_directive (identifier) @target)
-      (file_scoped_namespace_declaration (identifier) @target)
-    ])]]
-    local query = vim.treesitter.parse_query(M.language, namespace_scopes_query)
-    local matches = query:iter_captures(root, content, 0, -1)
-    for id, node, metadata in matches do
-      namespace_scopes[vim.treesitter.query.get_node_text(node, content)] = true
-    end
+function M.get_scopes_for_node(root, content, selected_node)
+  local function does_node_contain(containing_node, contained_node)
+    local containing_start_row, containing_start_col, containing_end_row, containing_end_col = containing_node:range()
+    local contained_start_row, contained_start_col, contained_end_row, contained_end_col = contained_node:range()
+    return utils.does_range_contain(
+      {containing_start_row, containing_start_col, containing_end_row, containing_end_col},
+      {contained_start_row, contained_start_col, contained_end_row, contained_end_col})
   end
 
-  -- @INCOMPLETE structs, records etc
-  local class_scopes = {}
-  do
-    local query = vim.treesitter.parse_query(M.language, '((class_declaration) @declaration)')
-    local matches = query:iter_captures(root, content, 0, -1)
-    for id, node, metadata in matches do
-      -- Check if selected_node is in range of node - if it is, then add it to property scopes
-      local node_start_row, node_start_col, node_end_row, node_end_col = node:range()
-      local selected_start_row, selected_start_col, selected_end_row, selected_end_col = selected_node:range()
-      if utils.does_range_contain(
-        {node_start_row, node_start_col, node_end_row, node_end_col},
-        {selected_start_row, selected_start_col, selected_end_row, selected_end_col}) then
-        local name = vim.treesitter.query.get_node_text(node:field('name')[1], content)
-        class_scopes[name] = true
+  local imported_modules = {}
+  local module = nil
+  local ctype = nil
+  local method = nil
+  local scopes_query = [[([
+    (using_directive (identifier) @import)
+    (file_scoped_namespace_declaration (identifier) @module)
+    ((class_declaration) @ctype)
+    ((struct_declaration) @ctype)
+    ((method_declaration) @method)
+  ])]]
+
+  local query = vim.treesitter.parse_query(M.language, scopes_query)
+  local matches = query:iter_captures(root, content, 0, -1)
+  for id, node, metadata in matches do
+    local capture = query.captures[id]
+    if capture == 'import' then
+      imported_modules[vim.treesitter.query.get_node_text(node, content)] = true
+    elseif capture == 'module' then
+      module = vim.treesitter.query.get_node_text(node, content)
+    end
+    local parent_type = selected_node:parent():type()
+    local type_node = selected_node:parent():field('type')[1]
+    if not (type_node == selected_node or parent_type == 'base_list' or parent_type == 'generic_name') then
+      if capture == 'ctype' then
+        if does_node_contain(node, selected_node) then
+         ctype = vim.treesitter.query.get_node_text(node:field('name')[1], content)
+        end
+      elseif capture == 'method' then
+        if does_node_contain(node, selected_node) then
+          method = vim.treesitter.query.get_node_text(node:field('name')[1], content)
+        end
       end
     end
   end
 
   return {
-    namespace_scopes = namespace_scopes,
-    class_scopes = class_scopes,
+    imported_modules = imported_modules,
+    module = module,
+    ctype = ctype,
+    method = method,
   }
-end
-
--- @INCOMPLETE support other scopes
--- @INCOMPLETE handle classic namespaces with brackets
--- @INCOMPLETE this is terrible
-function M.get_covering_scopes(root, content)
-  local query_string = [[([
-    (file_scoped_namespace_declaration (identifier) @namespace)
-    ((class_declaration) @class)
-  ])]]
-  local query = vim.treesitter.parse_query(M.language, query_string)
-  local matches = query:iter_captures(root, content, 0, -1)
-  local result = { class_scopes = {} }
-  for id, node, metadata in matches do
-    if query.captures[id] == 'namespace' then
-      local name = vim.treesitter.query.get_node_text(node, content)
-      result.namespace_scope = name
-    elseif query.captures[id] == 'class' then
-      local name = vim.treesitter.query.get_node_text(node:field('name')[1], content)
-      local node_start_row, node_start_col, node_end_row, node_end_col = node:range()
-      result.class_scopes[#result.class_scopes + 1] = {
-        name = name,
-        start = { node_start_row, node_start_col },
-        finish = { node_end_row, node_end_col },
-      }
-    end
-  end
-
-  return result
 end
 
 function M.get_query(selected_node)
