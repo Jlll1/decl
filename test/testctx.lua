@@ -75,10 +75,16 @@ function M.test(name, callback)
   registered_tests[#registered_tests + 1] = { name = name, callback = callback }
 end
 
-function M.execute()
-  for i, v in ipairs(registered_tests) do
-    print(i .. ' ' .. v.name)
-    v.callback()
+function M.execute(test_id)
+  if test_id then
+    local test = registered_tests[test_id]
+    print(test_id .. '  ' .. test.name)
+    test.callback()
+  else
+    for i, v in ipairs(registered_tests) do
+      print(i .. ' ' .. v.name)
+      v.callback()
+    end
   end
 end
 
