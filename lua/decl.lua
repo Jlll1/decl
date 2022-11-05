@@ -44,6 +44,8 @@ function M.go_to()
     filenames[filename] = true
   end
 
+  local level0_results = {} -- Same block as the node
+  local level1_results = {} -- One level higher
   for filename, _ in pairs(filenames) do
     -- The declaration must be in a language that matches the current one.
     local file_extension = string.match(filename, '.*%.(.*)')
@@ -68,16 +70,28 @@ function M.go_to()
         if node_text == selected_node_text then
           if (selected_node_scopes.module == node_scopes.module or
                 selected_node_scopes.imported_modules[node_scopes.module]) and
-              selected_node_scopes.ctype == node_scopes.ctype and
-              selected_node_scopes.method == node_scopes.method then
+              selected_node_scopes.ctype == node_scopes.ctype then
             local row, col, _ = node:start()
-            results[#results + 1] = { filename = filename, row = row + 1, col = col }
+            local result = { filename = filename, row = row + 1, col = col }
+            if selected_node_scopes.method == node_scopes.method then
+              level0_results[#level0_results + 1] = result
+            else
+              level1_results[#level1_results + 1] = result
+            end
           end
         end
       end
     end)
 
     ::continue::
+  end
+
+  -- If no results are found in the most local scope, go one scope higher
+  -- This obviously has a limit, where you can't go over a certain scope (like class scope)
+  if #level0_results > 0 then
+    results = level0_results
+  else
+    results = level1_results
   end
 
   return results
