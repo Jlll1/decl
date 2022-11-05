@@ -22,6 +22,7 @@ function M.get_scopes_for_node(root, content, selected_node)
     ((class_declaration) @ctype)
     ((struct_declaration) @ctype)
     ((method_declaration) @method)
+    ((block) @block)
   ])]]
 
   local query = vim.treesitter.parse_query(M.language, scopes_query)
@@ -44,6 +45,11 @@ function M.get_scopes_for_node(root, content, selected_node)
         if does_node_contain(node, selected_node) then
           method = vim.treesitter.query.get_node_text(node:field('name')[1], content)
         end
+      elseif capture == 'block' then
+        if does_node_contain(node, selected_node) then
+          local sr, sc, er, ec = node:range()
+          block = sr .. ', ' .. sc .. ' : ' .. er .. ', ' .. ec
+        end
       end
     end
   end
@@ -53,6 +59,7 @@ function M.get_scopes_for_node(root, content, selected_node)
     module = module,
     ctype = ctype,
     method = method,
+    block = block,
   }
 end
 

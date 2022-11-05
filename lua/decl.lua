@@ -46,6 +46,7 @@ function M.go_to()
 
   local level0_results = {} -- Same block as the node
   local level1_results = {} -- One level higher
+  local level2_results = {} -- One level higher
   for filename, _ in pairs(filenames) do
     -- The declaration must be in a language that matches the current one.
     local file_extension = string.match(filename, '.*%.(.*)')
@@ -68,15 +69,18 @@ function M.go_to()
         local node_text = vim.treesitter.query.get_node_text(node, file_content)
         -- @IMPROVEMENT can matching be done with a query?
         if node_text == selected_node_text then
+          -- This shouldn't be hardcoded like it is now
           if (selected_node_scopes.module == node_scopes.module or
                 selected_node_scopes.imported_modules[node_scopes.module]) and
               selected_node_scopes.ctype == node_scopes.ctype then
             local row, col, _ = node:start()
             local result = { filename = filename, row = row + 1, col = col }
-            if selected_node_scopes.method == node_scopes.method then
+            if selected_node_scopes.block == node_scopes.block then
               level0_results[#level0_results + 1] = result
-            else
+            elseif selected_node_scopes.method == node_scopes.method then
               level1_results[#level1_results + 1] = result
+            else
+              level2_results[#level1_results + 1] = result
             end
           end
         end
@@ -90,8 +94,10 @@ function M.go_to()
   -- This obviously has a limit, where you can't go over a certain scope (like class scope)
   if #level0_results > 0 then
     results = level0_results
-  else
+  elseif #level1_results > 0 then
     results = level1_results
+  else
+    results = level2_results
   end
 
   return results

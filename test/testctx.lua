@@ -1,7 +1,6 @@
 local M = {}
 
-local function is_equivalent(v1, v2)
-  local t = type(v1)
+local function is_equivalent(v1, v2) local t = type(v1)
   if t ~= type(v2) then return false end
   if t ~= 'table' then return v1 == v2 end
   for k, v in pairs(v1) do
@@ -75,6 +74,14 @@ function M.test(name, callback)
   registered_tests[#registered_tests + 1] = { name = name, callback = callback }
 end
 
+-- @INCOMPLETE this obviously has been thrown together in haste
+-- I don't think our usecase warrants a full fledged unit test library,
+-- but this could be use a little more love
+-- Wishlist:
+-- * --quiet to only print output for failed tests
+-- * output total/passed/failed count
+-- * test_id should handle range of test_ids
+-- * update the dockerfile to allow for passing test_id to `docker run`
 function M.execute(test_id)
   if test_id then
     local test = registered_tests[test_id]

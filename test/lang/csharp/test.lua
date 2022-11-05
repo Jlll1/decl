@@ -173,30 +173,30 @@ end
 -- properties_ns_other_class_to.cs is in namespace PropertiesNSTo
 -- Test ignoring properties declared in outside imported namespace
 --   (properties_same_class_*.cs and properties_other_class_*.cs contain the same properties but are in Properties namespace)
-do
-  local inputs = {
-    { 'property passed as parameter',         { 14, 17 }, { 5, 16 } },
-    { 'property asigned to variable',         { 15, 15 }, { 5, 16 } },
-    { 'method call asigned to variable',      { 16, 15 }, { 7, 13 } },
-    { 'property acccessed in a statement',    { 17, 7 },  { 5, 16 } },
-    { 'method call acccessed in a statement', { 18, 7 },  { 7, 13 } },
-  }
-  for _, v in ipairs(inputs) do
-    test('Go to ' .. v[1] .. ' declared outside accessing class in imported namespace', function ()
-      vim.cmd('e ' .. vim.fn.fnameescape('test/lang/csharp/files/properties_ns_other_class_from.cs'))
-      vim.api.nvim_win_set_cursor(0, v[2])
+-- do
+--   local inputs = {
+--     { 'property passed as parameter',         { 14, 17 }, { 5, 16 } },
+--     { 'property asigned to variable',         { 15, 15 }, { 5, 16 } },
+--     { 'method call asigned to variable',      { 16, 15 }, { 7, 13 } },
+--     { 'property acccessed in a statement',    { 17, 7 },  { 5, 16 } },
+--     { 'method call acccessed in a statement', { 18, 7 },  { 7, 13 } },
+--   }
+--   for _, v in ipairs(inputs) do
+--     test('Go to ' .. v[1] .. ' declared outside accessing class in imported namespace', function ()
+--       vim.cmd('e ' .. vim.fn.fnameescape('test/lang/csharp/files/properties_ns_other_class_from.cs'))
+--       vim.api.nvim_win_set_cursor(0, v[2])
 
-      local results = require('decl').go_to()
+--       local results = require('decl').go_to()
 
-      if assert.not_nil(results, 'results') and assert.count(results, 1, 'results') then
-        local result = results[1]
-        assert.equal(result.filename, 'test/lang/csharp/files/properties_ns_other_class_to.cs')
-        assert.equal(result.row, v[3][1])
-        assert.equal(result.col, v[3][2])
-      end
-    end)
-  end
-end
+--       if assert.not_nil(results, 'results') and assert.count(results, 1, 'results') then
+--         local result = results[1]
+--         assert.equal(result.filename, 'test/lang/csharp/files/properties_ns_other_class_to.cs')
+--         assert.equal(result.row, v[3][1])
+--         assert.equal(result.col, v[3][2])
+--       end
+--     end)
+--   end
+-- end
 
 -- Test finding local variable definitions
 -- Test ignoring local variable definitions in other methods
