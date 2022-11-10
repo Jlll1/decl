@@ -4,19 +4,19 @@ namespace PropertiesNS;
 
 public class PropertiesOtherClassFrom
 {
-  public string SomePropOtherClassNS { get; set; }
+  public string SomePropOtherClass { get; set; }
 
-  public int SomeMethodOtherClassNS()
+  public int SomeMethodOtherClass()
   {
   }
 
   public void Test()
   {
     var x = new PropertiesOtherClassFrom();
-    Something(x.SomePropOtherClassNS);
-    var a = x.SomePropOtherClassNS;
-    var b = x.SomeMethodOtherClassNS();
-    x.SomePropOtherClassNS;
-    x.SomeMethodOtherClassNS();
+    Something(x.SomePropOtherClass);
+    var a = x.SomePropOtherClass;
+    var b = x.SomeMethodOtherClass();
+    x.SomePropOtherClass;
+    x.SomeMethodOtherClass();
   }
 }

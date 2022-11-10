@@ -29,16 +29,6 @@ function M.get_scopes_for_node(root, content, selected_node)
     ((block) @block)
   ])]]
 
-  do
-    -- @INCOMPLETE remove this when scoping is implemented for member access
-    -- If node is member access, return all matching nodes regardless of scoping
-    local parent_node = selected_node:parent()
-    if parent_node:type() == 'member_access_expression' and
-        parent_node:field('name')[1] == selected_node then
-      return nil
-    end
-  end
-
   local query = vim.treesitter.parse_query(M.language, scopes_query)
   local matches = query:iter_captures(root, content, 0, -1)
   for id, node, metadata in matches do
@@ -48,9 +38,17 @@ function M.get_scopes_for_node(root, content, selected_node)
     elseif capture == 'module' then
       result.module = vim.treesitter.query.get_node_text(node, content)
     end
-    local parent_type = selected_node:parent():type()
-    local type_node = selected_node:parent():field('type')[1]
-    if not (type_node == selected_node or parent_type == 'base_list' or parent_type == 'generic_name') then
+
+    local parent_node = selected_node:parent()
+    local parent_type = parent_node:type()
+    local type_node = parent_node:field('type')[1]
+    if not (
+        type_node == selected_node or
+        parent_type == 'base_list' or
+        parent_type == 'generic_name' or
+        -- @INCOMPLETE remove this when scoping is implemented for member access (if ever :))
+        (parent_type == 'member_access_expression' and parent_node:field('name')[1] == selected_node)
+      ) then
       if capture == 'ctype' then
         if does_node_contain(node, selected_node) then
          result.ctype = vim.treesitter.query.get_node_text(node:field('name')[1], content)

@@ -4,9 +4,9 @@ namespace PropertiesNSTo;
 
 public class PropertiesOtherClassTo
 {
-  public string SomePropOtherClassNS { get; set; }
+  public string SomePropOtherClass { get; set; }
 
-  public int SomeMethodOtherClassNS()
+  public int SomeMethodOtherClass()
   {
   }
 }

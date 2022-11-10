@@ -72,13 +72,10 @@ function M.go_to()
           -- @IMPROVEMENT This shouldn't be hardcoded like it is now
           -- Instead, it should dynamically adapt to different scope results,
           -- to be more flexible for differnet language implementations
-          if (selected_node_scopes == nil) then
-            local row, col, _ = node:start()
-            local result = { filename = filename, row = row + 1, col = col }
-            level0_results[#level0_results + 1] = result
-          elseif (selected_node_scopes.module == node_scopes.module or
+          if (selected_node_scopes.module == node_scopes.module or
                 selected_node_scopes.imported_modules[node_scopes.module]) and
-              selected_node_scopes.ctype == node_scopes.ctype then
+              (selected_node_scopes.ctype == node_scopes.ctype or
+                selected_node_scopes.ctype == nil) then
             local row, col, _ = node:start()
             local result = { filename = filename, row = row + 1, col = col }
             if selected_node_scopes.block == node_scopes.block then

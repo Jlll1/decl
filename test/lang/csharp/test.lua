@@ -139,7 +139,7 @@ do
 end
 
 
--- Test finding properties and methods declared in another class
+-- Test finding member properties and methods of another class
 do
   local inputs = {
     { 'property passed as parameter',         { 14, 17 }, { 5, 16 } },
@@ -164,7 +164,7 @@ do
   end
 end
 
--- Test finding properties and methods declared in another class in imported namespace
+-- Test finding member properties and methods of another class
 -- properties_ns_other_class_from.cs is in namespace PropertiesNS and has using PropertiesNSTo
 -- properties_ns_other_class_to.cs is in namespace PropertiesNSTo
 -- Test ignoring properties declared in outside imported namespace
