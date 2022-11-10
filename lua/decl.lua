@@ -69,8 +69,14 @@ function M.go_to()
         local node_text = vim.treesitter.query.get_node_text(node, file_content)
         -- @IMPROVEMENT can matching be done with a query?
         if node_text == selected_node_text then
-          -- This shouldn't be hardcoded like it is now
-          if (selected_node_scopes.module == node_scopes.module or
+          -- @IMPROVEMENT This shouldn't be hardcoded like it is now
+          -- Instead, it should dynamically adapt to different scope results,
+          -- to be more flexible for differnet language implementations
+          if (selected_node_scopes == nil) then
+            local row, col, _ = node:start()
+            local result = { filename = filename, row = row + 1, col = col }
+            level0_results[#level0_results + 1] = result
+          elseif (selected_node_scopes.module == node_scopes.module or
                 selected_node_scopes.imported_modules[node_scopes.module]) and
               selected_node_scopes.ctype == node_scopes.ctype then
             local row, col, _ = node:start()

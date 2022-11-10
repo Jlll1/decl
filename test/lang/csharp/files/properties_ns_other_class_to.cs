@@ -1,10 +1,12 @@
+using SomethingElseToMatchLineCount;
+
 namespace PropertiesNSTo;
 
 public class PropertiesOtherClassTo
 {
-  public string SomeProp { get; set; }
+  public string SomePropOtherClassNS { get; set; }
 
-  public int SomeMethod()
+  public int SomeMethodOtherClassNS()
   {
   }
 }

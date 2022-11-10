@@ -2,9 +2,9 @@ namespace Properties;
 
 public class PropertiesOtherClassTo
 {
-  public string SomeProp { get; set; }
+  public string SomePropOtherClass { get; set; }
 
-  public int SomeMethod()
+  public int SomeMethodOtherClass()
   {
   }
 }

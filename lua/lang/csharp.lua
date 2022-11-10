@@ -12,10 +12,14 @@ function M.get_scopes_for_node(root, content, selected_node)
       {contained_start_row, contained_start_col, contained_end_row, contained_end_col})
   end
 
-  local imported_modules = {}
-  local module = nil
-  local ctype = nil
-  local method = nil
+  local result = {
+    imported_modules = {},
+    module = nil,
+    ctype = nil,
+    method = nil,
+    block = nil,
+  }
+
   local scopes_query = [[([
     (using_directive (identifier) @import)
     (file_scoped_namespace_declaration (identifier) @module)
@@ -25,42 +29,46 @@ function M.get_scopes_for_node(root, content, selected_node)
     ((block) @block)
   ])]]
 
+  do
+    -- @INCOMPLETE remove this when scoping is implemented for member access
+    -- If node is member access, return all matching nodes regardless of scoping
+    local parent_node = selected_node:parent()
+    if parent_node:type() == 'member_access_expression' and
+        parent_node:field('name')[1] == selected_node then
+      return nil
+    end
+  end
+
   local query = vim.treesitter.parse_query(M.language, scopes_query)
   local matches = query:iter_captures(root, content, 0, -1)
   for id, node, metadata in matches do
     local capture = query.captures[id]
     if capture == 'import' then
-      imported_modules[vim.treesitter.query.get_node_text(node, content)] = true
+      result.imported_modules[vim.treesitter.query.get_node_text(node, content)] = true
     elseif capture == 'module' then
-      module = vim.treesitter.query.get_node_text(node, content)
+      result.module = vim.treesitter.query.get_node_text(node, content)
     end
     local parent_type = selected_node:parent():type()
     local type_node = selected_node:parent():field('type')[1]
     if not (type_node == selected_node or parent_type == 'base_list' or parent_type == 'generic_name') then
       if capture == 'ctype' then
         if does_node_contain(node, selected_node) then
-         ctype = vim.treesitter.query.get_node_text(node:field('name')[1], content)
+         result.ctype = vim.treesitter.query.get_node_text(node:field('name')[1], content)
         end
       elseif capture == 'method' then
         if does_node_contain(node, selected_node) then
-          method = vim.treesitter.query.get_node_text(node:field('name')[1], content)
+          result.method = vim.treesitter.query.get_node_text(node:field('name')[1], content)
         end
       elseif capture == 'block' then
         if does_node_contain(node, selected_node) then
           local sr, sc, er, ec = node:range()
-          block = sr .. ', ' .. sc .. ' : ' .. er .. ', ' .. ec
+          result.block = sr .. ', ' .. sc .. ' : ' .. er .. ', ' .. ec
         end
       end
     end
   end
 
-  return {
-    imported_modules = imported_modules,
-    module = module,
-    ctype = ctype,
-    method = method,
-    block = block,
-  }
+  return result
 end
 
 function M.get_query(selected_node)
