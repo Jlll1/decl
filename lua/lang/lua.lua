@@ -1,7 +1,7 @@
 local M = {}
 M.language = 'lua'
 
-get_query = function (selected_node)
+function M.get_query (selected_node)
   local query_string
   local parent_type = selected_node:parent():type()
   local parent_parent_type = selected_node:parent():parent():type()

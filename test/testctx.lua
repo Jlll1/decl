@@ -93,6 +93,7 @@ function M.execute(test_id)
       v.callback()
     end
   end
+  registered_tests = {}
 end
 
 return M
