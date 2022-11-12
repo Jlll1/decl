@@ -4,14 +4,6 @@ M.language = 'c_sharp'
 local utils = require('utils')
 
 function M.get_scopes_for_node(root, content, selected_node)
-  local function does_node_contain(containing_node, contained_node)
-    local containing_start_row, containing_start_col, containing_end_row, containing_end_col = containing_node:range()
-    local contained_start_row, contained_start_col, contained_end_row, contained_end_col = contained_node:range()
-    return utils.does_range_contain(
-      {containing_start_row, containing_start_col, containing_end_row, containing_end_col},
-      {contained_start_row, contained_start_col, contained_end_row, contained_end_col})
-  end
-
   local result = {
     imported_modules = {},
     module = nil,
@@ -50,15 +42,15 @@ function M.get_scopes_for_node(root, content, selected_node)
         (parent_type == 'member_access_expression' and parent_node:field('name')[1] == selected_node)
       ) then
       if capture == 'ctype' then
-        if does_node_contain(node, selected_node) then
+        if utils.does_node_contain(node, selected_node) then
          result.ctype = vim.treesitter.query.get_node_text(node:field('name')[1], content)
         end
       elseif capture == 'method' then
-        if does_node_contain(node, selected_node) then
+        if utils.does_node_contain(node, selected_node) then
           result.method = vim.treesitter.query.get_node_text(node:field('name')[1], content)
         end
       elseif capture == 'block' then
-        if does_node_contain(node, selected_node) then
+        if utils.does_node_contain(node, selected_node) then
           local sr, sc, er, ec = node:range()
           result.block = sr .. ', ' .. sc .. ' : ' .. er .. ', ' .. ec
         end

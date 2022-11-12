@@ -1,3 +1,6 @@
 [submodule "treesitter-parsers/tree-sitter-c-sharp"]
 	path = treesitter-parsers/tree-sitter-c-sharp
 	url = https://github.com/tree-sitter/tree-sitter-c-sharp
+[submodule "treesitter-parsers/tree-sitter-lua"]
+	path = treesitter-parsers/tree-sitter-lua
+	url = https://github.com/MunifTanjim/tree-sitter-lua

@@ -16,7 +16,7 @@ function M.go_to()
   local results = {}
 
   -- @TODO hardcoded filetype
-  lang_handler = filetype_to_languagehandler['cs']
+  lang_handler = filetype_to_languagehandler['lua']
   -- @INCOMPLETE provide error message
   if not lang_handler then return end
 
@@ -51,7 +51,7 @@ function M.go_to()
     -- The declaration must be in a language that matches the current one.
     local file_extension = string.match(filename, '.*%.(.*)')
     -- @TODO hardcoded filetype
-    if file_extension ~= 'cs' then goto continue end
+    if file_extension ~= 'lua' then goto continue end
 
     local file = io.open(filename, "r")
     local file_content = file:read("*all")

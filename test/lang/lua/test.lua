@@ -204,14 +204,14 @@ do
   }
   for _, v in ipairs(inputs) do
     test('Go to ' .. v[1] .. ' definited in module in another file', function ()
-      vim.cmd('e ' .. vim.fn.fnameescape('test/lang/lua/files/module_declarations_from.lua'))
+      vim.cmd('e ' .. vim.fn.fnameescape('test/lang/lua/files/modules_declarations_from.lua'))
       vim.api.nvim_win_set_cursor(0, v[2])
 
       local results = require('decl').go_to()
 
       if assert.not_nil(results, 'results') and assert.count(results, 1, 'results') then
         local result = results[1]
-        assert.equal(result.filename, 'test/lang/lua/files/module_declarations_to.lua', 'filename')
+        assert.equal(result.filename, 'test/lang/lua/files/modules_declarations_to.lua', 'filename')
         assert.equal(result.row, v[3][1], 'row')
         assert.equal(result.col, v[3][2], 'col')
       end

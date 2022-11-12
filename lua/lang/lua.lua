@@ -1,15 +1,26 @@
 local M = {}
 M.language = 'lua'
 
-function M.get_query (selected_node)
+function M.get_scopes_for_node(root, content, selected_node)
+  local result = {
+    imported_modules = {},
+    module = nil,
+    ctype = nil,
+    method = nil,
+    block = nil,
+  }
+
+  return result
+end
+
+function M.get_query(selected_node)
   local query_string
-  local parent_type = selected_node:parent():type()
-  local parent_parent_type = selected_node:parent():parent():type()
-  if parent_type == 'dot_index_expression' and parent_parent_type == 'function_call' then
-    query_string = '(function_declaration (identifier) @target)'
-  elseif parent_type == 'function_call' then
-    query_string = '(function_declaration (identifier) @target)'
-  end
+
+  local node_type = selected_node:type()
+  query_string = [[([
+    (function_declaration (identifier) @target)
+    (assignment_statement (variable_list (identifier) @target))
+  ])]]
 
   return query_string
 end

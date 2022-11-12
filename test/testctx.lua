@@ -78,10 +78,12 @@ end
 -- I don't think our usecase warrants a full fledged unit test library,
 -- but this could be use a little more love
 -- Wishlist:
+-- * for some reason vim.bo.filetype returns nothing inside test run
 -- * --quiet to only print output for failed tests
 -- * output total/passed/failed count
 -- * test_id should handle range of test_ids
 -- * update the dockerfile to allow for passing test_id to `docker run`
+-- * update the dockerfile to allow for passing language to `docker run`
 function M.execute(test_id)
   if test_id then
     local test = registered_tests[test_id]
