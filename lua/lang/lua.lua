@@ -49,13 +49,14 @@ function M.get_scopes_for_node(root, content, selected_node, filename)
   return result
 end
 
-function M.get_query(selected_node)
+function M.get_query(selected_node, selected_node_text)
   local query_string
 
   local node_type = selected_node:type()
   query_string = [[([
     (function_declaration (identifier) @target)
     (assignment_statement (variable_list (identifier) @target))
+    (#eq? @target "]] .. selected_node_text .. [[")
   ])]]
 
   return query_string

@@ -61,7 +61,7 @@ function M.get_scopes_for_node(root, content, selected_node)
   return result
 end
 
-function M.get_query(selected_node)
+function M.get_query(selected_node, selected_node_text)
   local query_string
   local parent_type = selected_node:parent():type()
   local type_node = selected_node:parent():field('type')[1]
@@ -76,7 +76,7 @@ function M.get_query(selected_node)
       (class_declaration (base_list (identifier) @target))
       (interface_declaration (base_list (identifier) @target))
       (struct_declaration (base_list (identifier) @target))
-    ])]]
+      ]]
   elseif parent_type == "member_access_expression" then
     local name_node = selected_node:parent():field('name')[1]
     if name_node == selected_node then
@@ -86,14 +86,14 @@ function M.get_query(selected_node)
         (method_declaration (identifier) @target)
         (enum_member_declaration (identifier) @target)
         (record_declaration (parameter_list (parameter name: (identifier) @target)))
-      ])]]
+        ]]
     else
       query_string = [[([
         (property_declaration (identifier) @target)
         (variable_declaration (variable_declarator (identifier) @target))
         (class_declaration (identifier) @target)
         (enum_declaration (identifier) @target)
-      ])]]
+        ]]
     end
   elseif selected_node:type() == 'identifier' then
     query_string = [[([
@@ -102,8 +102,9 @@ function M.get_query(selected_node)
       (method_declaration (identifier) @target)
       (parameter_list (parameter name: (identifier) @target))
       (local_function_statement name: (identifier) @target)
-    ])]]
+      ]]
   end
+  query_string = query_string .. '(#eq? @target "' .. selected_node_text .. '")])'
   return query_string
 end
 

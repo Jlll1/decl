@@ -30,7 +30,7 @@ function M.go_to()
   local selected_node = curr_parser:named_node_for_range({ row, col, row, col })
   local selected_node_text = vim.treesitter.query.get_node_text(selected_node, bufnr)
 
-  local query_string = lang_handler.get_query(selected_node)
+  local query_string = lang_handler.get_query(selected_node, selected_node_text)
   if not query_string then return results end
 
   local curr_root = curr_parser:tree_for_range({ row, col, row, col }):root()
@@ -67,25 +67,21 @@ function M.go_to()
       local matches = query:iter_captures(root, file_content, 0, -1)
       for id, node, metadata in matches do
         local node_scopes = lang_handler.get_scopes_for_node(root, file_content, node, filename)
-        local node_text = vim.treesitter.query.get_node_text(node, file_content)
-        -- @IMPROVEMENT can matching be done with a query?
-        if node_text == selected_node_text then
-          -- @IMPROVEMENT This shouldn't be hardcoded like it is now
-          -- Instead, it should dynamically adapt to different scope results,
-          -- to be more flexible for differnet language implementations
-          if (selected_node_scopes.module == node_scopes.module or
-                selected_node_scopes.imported_modules[node_scopes.module]) and
-              (selected_node_scopes.ctype == node_scopes.ctype or
-                selected_node_scopes.ctype == nil) then
-            local row, col, _ = node:start()
-            local result = { filename = filename, row = row + 1, col = col }
-            if selected_node_scopes.block == node_scopes.block then
-              level0_results[#level0_results + 1] = result
-            elseif selected_node_scopes.method == node_scopes.method then
-              level1_results[#level1_results + 1] = result
-            else
-              level2_results[#level1_results + 1] = result
-            end
+        -- @IMPROVEMENT This shouldn't be hardcoded like it is now
+        -- Instead, it should dynamically adapt to different scope results,
+        -- to be more flexible for differnet language implementations
+        if (selected_node_scopes.module == node_scopes.module or
+              selected_node_scopes.imported_modules[node_scopes.module]) and
+            (selected_node_scopes.ctype == node_scopes.ctype or
+              selected_node_scopes.ctype == nil) then
+          local row, col, _ = node:start()
+          local result = { filename = filename, row = row + 1, col = col }
+          if selected_node_scopes.block == node_scopes.block then
+            level0_results[#level0_results + 1] = result
+          elseif selected_node_scopes.method == node_scopes.method then
+            level1_results[#level1_results + 1] = result
+          else
+            level2_results[#level1_results + 1] = result
           end
         end
       end
