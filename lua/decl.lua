@@ -34,7 +34,8 @@ function M.go_to()
   if not query_string then return results end
 
   local curr_root = curr_parser:tree_for_range({ row, col, row, col }):root()
-  local selected_node_scopes = lang_handler.get_scopes_for_node(curr_root, bufnr, selected_node)
+  local current_filename = vim.fn.expand('%')
+  local selected_node_scopes = lang_handler.get_scopes_for_node(curr_root, bufnr, selected_node, current_filename)
 
   local rgcmd = "rg --vimgrep --no-heading " .. vim.fn.shellescape(selected_node_text)
   -- Since we iterate over all declarations in a file, we don't need to include any file more than once.
@@ -65,7 +66,7 @@ function M.go_to()
       local query = vim.treesitter.parse_query(language, query_string)
       local matches = query:iter_captures(root, file_content, 0, -1)
       for id, node, metadata in matches do
-        local node_scopes = lang_handler.get_scopes_for_node(root, file_content, node)
+        local node_scopes = lang_handler.get_scopes_for_node(root, file_content, node, filename)
         local node_text = vim.treesitter.query.get_node_text(node, file_content)
         -- @IMPROVEMENT can matching be done with a query?
         if node_text == selected_node_text then

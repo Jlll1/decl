@@ -33,7 +33,7 @@ do
   local inputs = {
     { 'declared in the same scope',            { 25, 3 }, { 21, 17 } },
     { 'declared one scope higher',             { 28, 5 }, { 21, 17 } },
-    { 'declared in the same scope in a block', { 32, 5 }, { 29, 20 } },
+    { 'declared in the same scope in a block', { 32, 5 }, { 29, 19 } },
     { 'declared in the same scope with the same name as variable in another block',
                                                { 38, 3 }, { 35, 17 } },
   }
