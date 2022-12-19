@@ -18,6 +18,7 @@ function M.get_scopes_for_node(root, content, selected_node, filename)
   local scopes_query = [[([
     ((function_declaration) @method)
     ((block) @block)
+    ((function_call (identifier) @import_opt (#eq? @import_opt "require")) @import)
   ])]]
 
   local query = vim.treesitter.parse_query(M.language, scopes_query)
@@ -43,6 +44,14 @@ function M.get_scopes_for_node(root, content, selected_node, filename)
           result.block = sr .. ',' .. sc .. ':' .. er .. ',' .. ec
         end
       end
+    elseif capture == 'import' then
+      local import_arg = vim.treesitter.query.get_node_text(node:field('arguments')[1], content)
+      local import = string.match(import_arg, [[%(*'*"*(.+[^'*"*%)*])]])
+      -- @NEXT concat import with correct path to match how lua modules work
+      local path = string.match(filename, '(.*)%/')
+      result.imported_modules[path .. '/' .. import] = true
+      result.imported_modules[path .. '/' .. import .. '.lua'] = true
+      result.imported_modules['/usr/local/lua/' .. import .. '/' .. import .. '.lua'] = true
     end
   end
 
@@ -55,8 +64,10 @@ function M.get_query(selected_node, selected_node_text)
   local node_type = selected_node:type()
   query_string = [[([
     (function_declaration (identifier) @target)
+    (function_declaration (dot_index_expression (identifier) @target))
     (parameters (identifier) @target)
     (assignment_statement (variable_list (identifier) @target))
+    (assignment_statement (variable_list (dot_index_expression (identifier) @target)))
     (#eq? @target "]] .. selected_node_text .. [[")
   ])]]
 

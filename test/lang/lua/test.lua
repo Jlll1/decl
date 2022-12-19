@@ -199,11 +199,11 @@ end
 -- Test ignoring global definitions with the same name (global_declarations_to)
 do
   local inputs = {
-    { 'variable', { 3, 16 }, { 3, 3 } },
-    { 'function', { 4, 11 }, { 5, 12 } },
+    { 'variable', { 3, 16 }, { 3, 2 } },
+    { 'function', { 4, 16 }, { 5, 11 } },
   }
   for _, v in ipairs(inputs) do
-    test('Go to ' .. v[1] .. ' definited in module in another file', function ()
+    test('Go to ' .. v[1] .. ' defined in module in another file', function ()
       vim.cmd('e ' .. vim.fn.fnameescape('test/lang/lua/files/modules_declarations_from.lua'))
       vim.api.nvim_win_set_cursor(0, v[2])
 
