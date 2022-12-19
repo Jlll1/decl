@@ -55,6 +55,7 @@ function M.get_query(selected_node, selected_node_text)
   local node_type = selected_node:type()
   query_string = [[([
     (function_declaration (identifier) @target)
+    (parameters (identifier) @target)
     (assignment_statement (variable_list (identifier) @target))
     (#eq? @target "]] .. selected_node_text .. [[")
   ])]]
